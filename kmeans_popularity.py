@@ -1,30 +1,7 @@
 import numpy as np
+from scipy.cluster.vq import kmeans, vq, whiten 
 from PIL import Image
 import timeit
-
-
-class Color:
-    def __init__(self, r, g, b):
-        self.r = round(r)
-        self.g = round(g)
-        self.b = round(b)
-        self.count = 1
-
-    def getRgb(self):
-        return (self.r, self.g, self.b)
-
-    def proximity(self, other):
-        r, g, b = other.getRgb()
-        return abs(self.r - r) + abs(self.g - g) + abs(self.b - b)
-
-    def combine(self, other):
-        self.count += 1
-
-        r, g, b = other.getRgb()
-        self.r = (r + self.r * (self.count - 1)) / self.count
-        self.g = (g + self.g * (self.count - 1)) / self.count
-        self.b = (b + self.b * (self.count - 1)) / self.count
-
 
 def showColors(colors):
     images = []
@@ -60,9 +37,8 @@ def showColors(colors):
         index += 1
     output.show()
 
-
 def main():
-    sensitivity = 70
+    sensitivity = 150
     compression = 0.1
 
     print("Finding popular colors with sensitivity of " + str(sensitivity) + " and image compression factor of " + str(compression) + "...")
@@ -80,23 +56,9 @@ def main():
 
     print("Processing image...")
     start = timeit.default_timer()
-    for y in range(h):
-        for x in range(w):
-            color = Color(pixels[x][y][0], pixels[x][y][1], pixels[x][y][2])
-            low = sensitivity
-            temp = None
 
-            for c in colors:
-                prox = c.proximity(color)
+    
 
-                if prox < low:
-                    low = prox
-                    temp = c
-
-            if temp is not None:
-                temp.combine(color)
-            else:
-                colors.append(color)
     stop = timeit.default_timer()
     print("Identified " + str(len(colors)) + " colors in " + str(stop - start) + "s.")
     showColors(colors)

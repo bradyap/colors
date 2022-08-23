@@ -4,27 +4,23 @@ import timeit
 
 
 class Color:
-    def __init__(self, r, g, b):
-        self.r = round(r)
-        self.g = round(g)
-        self.b = round(b)
+    def __init__(self, rgb):
+        self.rgb = rgb
         self.count = 1
 
     def getRgb(self):
-        return (self.r, self.g, self.b)
+        return self.rgb
 
     def proximity(self, other):
-        r, g, b = other.getRgb()
-        return abs(self.r - r) + abs(self.g - g) + abs(self.b - b)
+        rgb = other.getRgb()
+        squared_dist = np.sum((self.rgb - rgb) ** 2, axis=0)
+        dist = np.sqrt(squared_dist)
+        return dist
 
     def combine(self, other):
         self.count += 1
-
-        r, g, b = other.getRgb()
-        self.r = (r + self.r * (self.count - 1)) / self.count
-        self.g = (g + self.g * (self.count - 1)) / self.count
-        self.b = (b + self.b * (self.count - 1)) / self.count
-
+        rgb = other.getRgb()
+        self.rgb = np.add(rgb, self.rgb * (self.count - 1)) / self.count
 
 def showColors(colors):
     images = []
@@ -60,9 +56,8 @@ def showColors(colors):
         index += 1
     output.show()
 
-
 def main():
-    sensitivity = 70
+    sensitivity = 150
     compression = 0.1
 
     print("Finding popular colors with sensitivity of " + str(sensitivity) + " and image compression factor of " + str(compression) + "...")
@@ -80,9 +75,10 @@ def main():
 
     print("Processing image...")
     start = timeit.default_timer()
+
     for y in range(h):
         for x in range(w):
-            color = Color(pixels[x][y][0], pixels[x][y][1], pixels[x][y][2])
+            color = Color(pixels[x][y])
             low = sensitivity
             temp = None
 
@@ -97,6 +93,7 @@ def main():
                 temp.combine(color)
             else:
                 colors.append(color)
+
     stop = timeit.default_timer()
     print("Identified " + str(len(colors)) + " colors in " + str(stop - start) + "s.")
     showColors(colors)
